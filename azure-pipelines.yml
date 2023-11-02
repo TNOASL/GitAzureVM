@@ -1,0 +1,32 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: AzureKeyVault@2
+  inputs:
+    azureSubscription: 'Azure Pass - Sponsorship (81f0bd04-cb6d-4267-a768-e3d8f2ec475c)'
+    KeyVaultName: 'TNOAKeys'
+    SecretsFilter: 'TNOAAdmin'
+    RunAsPreJob: false
+- task: AzureResourceManagerTemplateDeployment@3
+  inputs:
+    deploymentScope: 'Resource Group'
+    azureResourceManagerConnection: 'Hadshana'
+    subscriptionId: '81f0bd04-cb6d-4267-a768-e3d8f2ec475c'
+    action: 'Create Or Update Resource Group'
+    resourceGroupName: 'Hadshana'
+    location: 'East US'
+    templateLocation: 'Linked artifact'
+    csmFile: 'azuredeploy.json'
+    csmParametersFile: 'azuredeploy.parameters.json'
+    overrideParameters: '-adminPassword $(TNOAAdmin)'
+    deploymentMode: 'Incremental'
+    deploymentName: 'GitDeploy'
